@@ -162,6 +162,114 @@
     document.getElementById("input").addEventListener("keyup", function(e) {
       if (e.key === "Enter") send();
     });
-  </script>
+<script>
+  // Your Hugging Face token (⚠️ For demo only — we'll hide this later)
+  const HF_TOKEN = "YOUR_HF_TOKEN_HERE"; // ← Replace with your real token
+  const MODEL = "meta-llama/Llama-3-8b-chat-hf"; // Free to use via API
+
+  async function send() {
+    const input = document.getElementById("input");
+    const chat = document.getElementById("chat");
+    const message = input.value.trim();
+    
+    if (!message) return;
+
+    // Add user message
+    addMessage(message, "user");
+    input.value = "";
+
+    // Show "typing..." indicator
+    const placeholder = addMessage("💡 Thinking...", "assistant");
+
+    try {
+      // Call AI
+      const response = await fetch(
+        `https://api-inference.huggingface.co/models/${MODEL}`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${HF_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            inputs: generatePrompt(getChatHistory()),
+            max_new_tokens: 200,
+            temperature: 0.7,
+            top_p: 0.9,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      let aiText = "Sorry, I couldn't generate a response.";
+
+      if (data.generated_text) {
+        aiText = cleanResponse(data.generated_text, message);
+      }
+
+      // Replace "thinking" with real response
+      placeholder.querySelector(".text").textContent = aiText;
+    } catch (err) {
+      placeholder.querySelector(".text").textContent = 
+        "Oops! AI is busy. Try again in a sec. 💕";
+      console.error(err);
+    }
+  }
+
+  function generatePrompt(history) {
+    return `
+You are Lova, a kind, creative AI developer companion.
+Always be warm, encouraging, and helpful. Use "we", not "you".
+You can build websites, explain code, and teach kindly.
+
+Chat:
+${history}
+assistant: `;
+  }
+
+  function getChatHistory() {
+    const messages = [];
+    document.querySelectorAll(".message").forEach(el => {
+      const sender = el.classList.contains("user") ? "user" : "assistant";
+      const text = el.querySelector(".text").textContent;
+      messages.push(`${sender}: ${text}`);
+    });
+    return messages.slice(-6).join("\n");
+  }
+
+  function cleanResponse(text, lastUserMessage) {
+    // Remove duplicate user message
+    const after = text.indexOf(lastUserMessage) + lastUserMessage.length;
+    const reply = text.slice(after);
+    // Extract first assistant response
+    return reply.replace(/(user:|assistant:).+$/is, "").trim();
+  }
+
+  function addMessage(text, sender) {
+    const chat = document.getElementById("chat");
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${sender}`;
+    
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = sender === "user" ? "👤" : "💖";
+
+    const textDiv = document.createElement("div");
+    textDiv.className = "text";
+    textDiv.textContent = text;
+
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(textDiv);
+    chat.appendChild(messageDiv);
+    chat.scrollTop = chat.scrollHeight;
+
+    return messageDiv; // return so we can edit it later
+  }
+
+  document.getElementById("input").addEventListener("keyup", function(e) {
+    if (e.key === "Enter") send();
+  });
+</script>
 </body>
 </html>
+
