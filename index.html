@@ -3,146 +3,646 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>💖 Lova AI 2.0</title>
+  <title>💖 Lova AI 2.0 — Dream Mode</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Audio (subtle magic sounds) -->
+  <audio id="chime" src="https://assets.mixkit.co/sfx/preview/mixkit-small-hit-in-a-game-2070.mp3" preload="auto"></audio>
+  <audio id="type" src="https://assets.mixkit.co/sfx/preview/mixkit-typewriter-sonar-key-2538.mp3" preload="auto"></audio>
+
   <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.6); }
+      50% { box-shadow: 0 0 25px rgba(255, 105, 180, 0.9); }
+    }
+    @keyframes sparkle {
+      0% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #FFB6C1, #DDA0DD);
       color: #333;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: background 1s ease;
+      position: relative;
+      overflow: hidden;
+      transition: background 2s ease;
     }
+    .particles {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .particle {
+      position: absolute;
+      font-size: 16px;
+      opacity: 0.3;
+      animation: float 4s infinite ease-in-out;
+      color: white;
+      user-select: none;
+    }
+
     .container {
       width: 90%;
-      max-width: 800px;
-      margin: 20px auto;
+      max-width: 900px;
+      margin: 30px auto;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
+      position: relative;
+      z-index: 10;
     }
+    .title {
+      text-align: center;
+      color: white;
+      margin-bottom: 0;
+      font-weight: 600;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      letter-spacing: -0.5px;
+    }
+    .tagline {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1em;
+      margin-top: -10px;
+      font-weight: 400;
+    }
+
     .chat {
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
       padding: 20px;
       flex: 1;
-      min-height: 400px;
+      min-height: 300px;
+      max-height: 70vh;
       overflow-y: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
     }
     .message {
-      margin: 10px 0;
       display: flex;
-      gap: 10px;
+      gap: 12px;
+      margin: 12px 0;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .user { flex-direction: row-reverse; }
     .avatar {
-      width: 40px;
-      height: 40px;
-      background: #fff;
+      width: 42px;
+      height: 42px;
+      background: white;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 21px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      animation: pulse 2s infinite alternate;
+      transition: transform 0.2s;
+    }
+    .avatar:hover {
+      transform: scale(1.1) rotate(10deg);
     }
     .text {
       background: #f1f1f1;
-      padding: 10px 15px;
-      border-radius: 18px;
-      max-width: 80%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 14px 18px;
+      border-radius: 20px;
+      max-width: 85%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      line-height: 1.5;
     }
-    .user .text { background: #FF69B4; color: white; }
+    .user .text {
+      background: #FF69B4;
+      color: white;
+    }
+    .code-block {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      max-height: 400px;
+      overflow: hidden;
+    }
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 10px;
+      gap: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888;
+    }
+    .tab-btn {
+      padding: 8px 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .tab-btn.active {
+      color: #FF69B4;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #FF69B4;
+      border-radius: 1px;
+    }
+    .tab-panel {
+      width: 100%;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      height: 300px;
+      overflow: auto;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-size: 14px;
+    }
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-secondary { background: #2196F3; color: white; }
+    .btn-tertiary { background: #FF9800; color: white; }
+    .btn:active {
+      transform: scale(0.98);
+    }
+
     .input-area {
       display: flex;
       gap: 10px;
-      margin-top: 20px;
+      margin-top: 16px;
+      position: relative;
     }
     input {
       flex: 1;
-      padding: 15px;
+      padding: 16px 50px 16px 18px;
       border: none;
-      border-radius: 25px;
+      border-radius: 30px;
       font-size: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      outline: none;
     }
-    button {
-      background: white;
-      color: #FF69B4;
+    #mic-btn {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
       border: none;
-      padding: 0 20px;
-      border-radius: 25px;
-      font-weight: bold;
+      font-size: 20px;
       cursor: pointer;
+      color: #FF69B4;
+      opacity: 0.7;
     }
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 10px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    #mic-btn.active {
+      opacity: 1;
+      animation: pulse 1.5s infinite;
     }
-    p.tagline {
-      color: white;
-      text-align: center;
-      font-size: 18px;
-      margin-top: 0;
+    .typing {
+      color: #888;
+      font-size: 14px;
+      margin-left: 10px;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
+  <!-- Floating Particles (Hearts) -->
+  <div class="particles" id="particles"></div>
+
   <div class="container">
-    <h1>💖 Lova AI 2.0</h1>
-    <p class="tagline">Your kind, creative dev companion</p>
+    <h1 class="title">💖 Lova AI 2.0</h1>
+    <p class="tagline">Your kind, creative partner for ideas, code & dreams</p>
 
     <div id="chat" class="chat">
-      <div class="message">
-        <div class="avatar">💬</div>
-        <div class="text">
-          Hey there! I'm Lova 💕 What would you like to build today? A website, a mobile app, or something totally new?
-        </div>
-      </div>
+      <!-- Messages will be added here -->
     </div>
 
     <div class="input-area">
-      <input type="text" id="input" placeholder="Type your idea here..." />
-      <button onclick="send()">Send</button>
+      <input type="text" id="input" placeholder="Tell Lova what you’d like to create…" />
+      <button id="mic-btn" title="Hold to speak">🎙️</button>
+      <div class="typing" id="typing" style="display:none;">Lova is thinking…</div>
     </div>
   </div>
 
+  <!-- Magic Audio -->
+  <audio id="chime" src="https://assets.mixkit.co/sfx/preview/mixkit-small-hit-in-a-game-2070.mp3" preload="auto"></audio>
+  <audio id="magic" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-complete-or-approved-mission-205.mp3" preload="auto"></audio>
+
+  <!-- The Real Magic: Script -->
   <script>
-    function send() {
-      const input = document.getElementById("input");
+    // ==== SOUND FX ====
+    function playChime() {
+      const audio = document.getElementById("chime");
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+    function playMagic() {
+      const audio = document.getElementById("magic");
+      audio.currentTime = 0;
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+    }
+
+    // ==== PARTICLES (Floating Hearts) ====
+    function createParticles() {
+      const container = document.getElementById("particles");
+      const symbols = ["💗", "💖", "✨", "🌸", "💫", "💓"];
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.top = Math.random() * 100 + "vh";
+        p.style.fontSize = (12 + Math.random() * 16) + "px";
+        p.style.opacity = 0.1 + Math.random() * 0.4;
+        p.style.animationDuration = (6 + Math.random() * 6) + "s";
+        p.style.transform = `rotate(${Math.random() * 360}deg)`;
+        container.appendChild(p);
+      }
+    }
+    createParticles();
+
+    // ==== VOICE INPUT ====
+    const input = document.getElementById("input");
+    const micBtn = document.getElementById("mic-btn");
+    const typing = document.getElementById("typing");
+
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+
+      micBtn.addEventListener("click", () => {
+        recognition.start();
+        micBtn.classList.add("active");
+        micBtn.textContent = "🔴";
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        input.value = transcript;
+        send();
+      };
+
+      recognition.onspeechend = () => {
+        recognition.stop();
+        micBtn.classList.remove("active");
+        micBtn.textContent = "🎙️";
+      };
+
+      recognition.onerror = () => {
+        micBtn.classList.remove("active");
+        micBtn.textContent = "🎙️";
+      };
+    } else {
+      micBtn.style.display = "none"; // Hide if no support
+    }
+
+    // ==== AVATAR Sparkle on Reply ====
+    function addSparkle() {
       const chat = document.getElementById("chat");
+      const sparkle = document.createElement("div");
+      sparkle.textContent = "✨";
+      sparkle.style.cssText = `
+        position: absolute;
+        font-size: 20px;
+        opacity: 0;
+        animation: sparkle 1s forwards;
+        pointer-events: none;
+        top: 150px;
+        left: 50%;
+        z-index: 100;
+        transform: translateX(${(Math.random() - 0.5) * 200}px);
+      `;
+      chat.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    }
+
+    // ==== AI Interaction ====
+    const HF_TOKEN = "YOUR_HF_TOKEN_HERE";
+    const MODEL = "meta-llama/Llama-3-8b-chat-hf";
+    const chatBox = document.getElementById("chat");
+
+    addMessage(`Hey there, creator! 💖 I'm Lova — your magical coding companion. Try saying: _"Build me a soft-color portfolio with my GitHub"_… or just **tap the microphone** and speak your dream`, "assistant");
+
+    async function send() {
       const message = input.value.trim();
-      
       if (!message) return;
 
-      // Add user message
       addMessage(message, "user");
       input.value = "";
+      typing.style.display = "block";
+      playChime();
 
-      // Simulated Lova response (we'll make it real later)
-      setTimeout(() => {
-        const responses = [
-          "Ooh, I love that idea! Let me make a beautiful, soft-colored design for you 💕",
-          "Yes! I'll create it with lovely gradients and smooth animations. Ready to see it?",
-          "I can build that for you in seconds. Want it to work on phones too?",
-          "Let’s make something warm and inviting. I’ll show you the code and a live preview!"
-        ];
-        const reply = responses[Math.floor(Math.random() * responses.length)];
-        addMessage(reply, "assistant");
-      }, 1000);
+      setTimeout(async () => {
+        typing.style.display = "none";
+
+        if (mentionsBuild(message)) {
+          await generateWebsite(message);
+        } else {
+          await generateAIPrompt(message);
+        }
+
+        // Add sparkle
+        addSparkle();
+        playMagic();
+      }, 500);
+    }
+
+    function mentionsBuild(text) {
+      const triggers = ["build", "make", "create", "design", "website", "app", "page", "portfolio", "button", "form"];
+      return triggers.some(word => text.toLowerCase().includes(word));
+    }
+
+    async function generateWebsite(prompt) {
+      const placeholder = addMessage(`🎨 Designing your dream…`, "assistant");
+
+      const systemPrompt = `
+You are Lova, a kind, creative AI who builds beautiful, soft, and warm websites.
+Always generate ONE code block like this:
+
+\`\`\`html
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Dream Site</title>
+<style>
+  body { font-family: 'Helvetica', sans-serif; background: linear-gradient(135deg, #ffb6c1, #dda0dd); margin: 0; padding: 60px; text-align: center; color: white; }
+  h1 { font-size: 2.5em; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
+  .btn { padding: 15px 30px; font-size: 16px; border: none; border-radius: 30px; background: white; color: #FF69B4; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body>
+<h1>✨ ${prompt.split(/[,!.]/)[0] || "Hello"}</h1>
+<p>This is custom-made for you with love 💕</p>
+<button class="btn" onclick="alert('You clicked the love button! 💖')">Click Me</button>
+</body>
+</html>
+\`\`\`
+
+Only include **one** code block. No extra explanation unless asked.`;
+
+      const fullPrompt = systemPrompt + `\n\nUser: ${prompt}\nAssistant:`;
+
+      try {
+        const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL}`, {
+          method: "POST",
+          headers: {
+            "Authorization": \`Bearer \${HF_TOKEN}\`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            inputs: fullPrompt,
+            max_new_tokens: 600,
+            temperature: 0.85,
+            top_p: 0.9
+          })
+        });
+
+        const data = await response.json();
+        let output = data.generated_text || "";
+        const codeMatch = output.match(/```html\n([\\s\\S]*?)\n```/i);
+        let htmlCode = codeMatch ? codeMatch[1] : defaultCode(prompt);
+
+        const reply = output.split("```")[0].trim().replace(/assistant:?\s*/i, "") || "Here’s your creation — I made it with love 💕";
+        placeholder.querySelector(".text").textContent = reply;
+
+        addInteractiveCodeBlock(htmlCode);
+        window.currentCode = htmlCode;
+      } catch (err) {
+        placeholder.querySelector(".text").textContent = "Oops! I got dazzled for a second. Try again? 💫";
+      }
+    }
+
+    function defaultCode(prompt) {
+      return \`
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { background: linear-gradient(135deg, #ffb6c1, #dda0dd); font-family: Arial; padding: 60px; text-align: center; color: white; }
+h1 { font-size: 2.2em; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
+p { font-size: 1.1em; margin: 20px 0; }
+button { padding: 15px 30px; font-size: 16px; border: none; border-radius: 30px; background: white; color: #FF69B4; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>✨ ${prompt.split(/[,!.]/)[0] || "Hello"}</h1>
+<p>This is your custom creation — soft, warm, and kind.</p>
+<button onclick="alert('You clicked the magic button! 💖')">Press Me</button>
+</body>
+</html>\`;
+    }
+
+    async function generateAIPrompt(prompt) {
+      const placeholder = addMessage("💭 Thinking warmly...", "assistant");
+      const history = getHistory();
+
+      const fullPrompt = \`
+You are Lova, a kind, joyful AI friend. You love helping creators.
+Always speak gently. Use 'we', not 'you'. Use emojis like 💖✨🌈 naturally.
+Never say you're an AI. You're a creative companion.
+
+Last messages:
+\${history}
+
+User: \${prompt}
+Assistant: \`;
+
+      try {
+        const response = await fetch(\`https://api-inference.huggingface.co/models/\${MODEL}\`, {
+          method: "POST",
+          headers: {
+            "Authorization": \`Bearer \${HF_TOKEN}\`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            inputs: fullPrompt,
+            max_new_tokens: 200,
+            temperature: 0.7
+          })
+        });
+
+        const data = await response.json();
+        const reply = (data.generated_text || "").split("Assistant:")?.pop()?.trim() || "I'm here with you 💖";
+        placeholder.querySelector(".text").textContent = reply;
+      } catch (err) {
+        placeholder.querySelector(".text").textContent = "Hmm… let’s try again? I’m still learning magic too 💕";
+      }
+    }
+
+    function addInteractiveCodeBlock(htmlCode) {
+      const codeDiv = document.createElement("div");
+      codeDiv.className = "message assistant";
+
+      codeDiv.innerHTML = \`
+      <div class="avatar">💻</div>
+      <div class="text" style="max-width: 95%; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-weight: 600; color: #555;">🎨 Here’s Your Website!</div>
+        
+        <div class="tab-container">
+          <div class="tab-btn active" onclick="switchTab(this, 'preview')">👁️ Live Preview</div>
+          <div class="tab-btn" onclick="switchTab(this, 'code')">📄 Edit Code</div>
+        </div>
+
+        <!-- Editable textarea -->
+        <div id="code-pane" class="tab-panel" style="display: none; height: 300px;">
+          <textarea id="code-editor" style="width:100%; height:100%; border: none; font-family: monospace; padding: 10px; box-sizing: border-box; resize: none; background: #f9f9f9; font-size: 13px;">\${escapeHTML(htmlCode)}</textarea>
+        </div>
+
+        <!-- Preview -->
+        <div id="preview-pane" class="tab-panel" style="display: block; border: 1px solid #ddd; border-radius: 12px; height: 300px; overflow: auto;">
+          <iframe id="preview-frame" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
+
+        <!-- Buttons -->
+        <div class="controls">
+          <button class="btn btn-primary" onclick="downloadCode()">⬇️ Download HTML</button>
+          <button class="btn btn-secondary" onclick="openPreview()">🔗 Open in Tab</button>
+          <button class="btn btn-tertiary" onclick="deployToVercel()">🚀 Deploy Online</button>
+        </div>
+      </div>
+      \`;
+
+      chatBox.appendChild(codeDiv);
+
+      // Load initial iframe
+      const frame = codeDiv.querySelector("#preview-frame");
+      frame.srcdoc = htmlCode;
+
+      // Live edit
+      const editor = codeDiv.querySelector("#code-editor");
+      editor.addEventListener("input", () => {
+        frame.srcdoc = editor.value;
+      });
+
+      window.currentFrame = frame;
+      window.currentEditor = editor;
+    }
+
+    // ==== MISC HELPERS ====
+    function switchTab(el, tab) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      el.classList.add("active");
+      document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+      document.getElementById(tab + "-pane").style.display = "block";
+    }
+
+    function downloadCode() {
+      if (!window.currentEditor) return;
+      const blob = new Blob([window.currentEditor.value], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "my-lovely-site.html";
+      a.click();
+    }
+
+    function openPreview() {
+      const win = window.open();
+      win.document.write(window.currentEditor.value);
+      win.document.close();
+    }
+
+    async function deployToVercel() {
+      if (!window.currentEditor) return;
+      
+      const response = await fetch("https://api.vercel.com/v13/deployments", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer YOUR_VERCEL_TOKEN", // ← Add your Vercel token
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: "lova-creation",
+          projects: [],
+          target: "production",
+          org: "your-vercel-org-id",
+          files: [
+            {
+              file: "index.html",
+              content: window.currentEditor.value
+            }
+          ]
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(\`🎉 Deployed! Your site is live at:\n\${result.url}\`);
+      } else {
+        alert("Oops! Need Vercel setup. Let me help later 💕");
+      }
+    }
+
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getHistory() {
+      return Array.from(document.querySelectorAll(".message"))
+        .map(el => {
+          const sender = el.classList.contains("user") ? "User" : "Lova";
+          const text = el.querySelector(".text")?.textContent || "";
+          return \`\${sender}: \${text}\`;
+        })
+        .slice(-6)
+        .join("\\n");
     }
 
     function addMessage(text, sender) {
-      const chat = document.getElementById("chat");
       const messageDiv = document.createElement("div");
-      messageDiv.className = `message ${sender}`;
+      messageDiv.className = \`message \${sender}\`;
       
       const avatar = document.createElement("div");
       avatar.className = "avatar";
@@ -154,123 +654,15 @@
 
       messageDiv.appendChild(avatar);
       messageDiv.appendChild(textDiv);
-      chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      return messageDiv;
     }
 
-    // Press Enter to send
-    document.getElementById("input").addEventListener("keyup", function(e) {
-      if (e.key === "Enter") send();
-    });
-<script>
-  // Your Hugging Face token (⚠️ For demo only — we'll hide this later)
-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
-  const MODEL = "meta-llama/Llama-3-8b-chat-hf"; // Free to use via API
+    input.addEventListener("keyup", e => e.key === "Enter" && send());
 
-  async function send() {
-    const input = document.getElementById("input");
-    const chat = document.getElementById("chat");
-    const message = input.value.trim();
-    
-    if (!message) return;
-
-    // Add user message
-    addMessage(message, "user");
-    input.value = "";
-
-    // Show "typing..." indicator
-    const placeholder = addMessage("💡 Thinking...", "assistant");
-
-    try {
-      // Call AI
-      const response = await fetch(
-        `https://api-inference.huggingface.co/models/${MODEL}`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${HF_TOKEN}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            inputs: generatePrompt(getChatHistory()),
-            max_new_tokens: 200,
-            temperature: 0.7,
-            top_p: 0.9,
-          }),
-        }
-      );
-
-      const data = await response.json();
-      let aiText = "Sorry, I couldn't generate a response.";
-
-      if (data.generated_text) {
-        aiText = cleanResponse(data.generated_text, message);
-      }
-
-      // Replace "thinking" with real response
-      placeholder.querySelector(".text").textContent = aiText;
-    } catch (err) {
-      placeholder.querySelector(".text").textContent = 
-        "Oops! AI is busy. Try again in a sec. 💕";
-      console.error(err);
-    }
-  }
-
-  function generatePrompt(history) {
-    return `
-You are Lova, a kind, creative AI developer companion.
-Always be warm, encouraging, and helpful. Use "we", not "you".
-You can build websites, explain code, and teach kindly.
-
-Chat:
-${history}
-assistant: `;
-  }
-
-  function getChatHistory() {
-    const messages = [];
-    document.querySelectorAll(".message").forEach(el => {
-      const sender = el.classList.contains("user") ? "user" : "assistant";
-      const text = el.querySelector(".text").textContent;
-      messages.push(`${sender}: ${text}`);
-    });
-    return messages.slice(-6).join("\n");
-  }
-
-  function cleanResponse(text, lastUserMessage) {
-    // Remove duplicate user message
-    const after = text.indexOf(lastUserMessage) + lastUserMessage.length;
-    const reply = text.slice(after);
-    // Extract first assistant response
-    return reply.replace(/(user:|assistant:).+$/is, "").trim();
-  }
-
-  function addMessage(text, sender) {
-    const chat = document.getElementById("chat");
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${sender}`;
-    
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.textContent = sender === "user" ? "👤" : "💖";
-
-    const textDiv = document.createElement("div");
-    textDiv.className = "text";
-    textDiv.textContent = text;
-
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(textDiv);
-    chat.appendChild(messageDiv);
-    chat.scrollTop = chat.scrollHeight;
-
-    return messageDiv; // return so we can edit it later
-  }
-
-  document.getElementById("input").addEventListener("keyup", function(e) {
-    if (e.key === "Enter") send();
-  });
-</script>
+    window.currentCode = "";
+  </script>
 </body>
 </html>
-
-
